@@ -1,15 +1,16 @@
 package com.purnendu.todo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+
 
 class MainActivity : AppCompatActivity(), CompoundButton.OnCheckedChangeListener {
 
     private lateinit var taskEditText: EditText
     private lateinit var add: Button
     private lateinit var linearLayout: LinearLayout
-    private lateinit var checkBoxList: MutableList<CheckBox>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -18,10 +19,8 @@ class MainActivity : AppCompatActivity(), CompoundButton.OnCheckedChangeListener
         add = findViewById(R.id.add)
         linearLayout = findViewById(R.id.linearLayout)
 
-        checkBoxList = mutableListOf()
-
         add.setOnClickListener {
-            val cb = CheckBox(applicationContext)
+            val cb = CheckBox(this@MainActivity)
             val text = taskEditText.text.toString()
             if (text.isEmpty()) {
                 Toast.makeText(this@MainActivity, "Empty field", Toast.LENGTH_SHORT).show()
@@ -29,25 +28,28 @@ class MainActivity : AppCompatActivity(), CompoundButton.OnCheckedChangeListener
             }
             cb.text = text
             linearLayout.addView(cb)
-            checkBoxList.add(cb)
             taskEditText.setText("")
             cb.setOnCheckedChangeListener(this)
         }
-
-
     }
 
-    override fun onCheckedChanged(p0: CompoundButton?, p1: Boolean) {
-        for (i in checkBoxList.indices) {
-            val checkBox = checkBoxList[i]
-            if (checkBox.isChecked) {
-                linearLayout.removeView(checkBox)
-//                Toast.makeText(
-//                    this@MainActivity,
-//                    "Deleting thr ${checkBox.text}",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-            }
+    override fun onCheckedChanged(p0: CompoundButton?, isChecked: Boolean) {
+        if (isChecked) {
+            object : CountDownTimer(500, 100) {
+                override fun onFinish() {
+                    linearLayout.removeView(p0)
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Deleting thr ${p0?.text}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onTick(millisUntilFinished: Long) {
+                    // millisUntilFinished    The amount of time until finished.
+                }
+            }.start()
+            p0?.setOnCheckedChangeListener(null)
         }
     }
 }
